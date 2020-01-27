@@ -8,6 +8,7 @@ info_frame = pd.read_csv('data/2019-nCoV.csv')
 info_frame.fillna(method='ffill', inplace=True)
 info_frame.fillna(method='bfill', inplace=True)
 init_date = datetime.strptime(info_frame['Date CST'][0], '%Y.%m.%d')
+today_days = (datetime.now() - init_date).days
 info_frame['Date CST'] = info_frame['Date CST'].apply(lambda x: (datetime.strptime(x, '%Y.%m.%d') - init_date).days)
 
 X = info_frame['Date CST'].to_numpy()
@@ -40,12 +41,7 @@ class SigmoidRegression(torch.nn.Module):
 
 
 learningRate = 0.03
-epochs = 30000
-
-sModel = SigmoidRegression(2000, 27, 1, 27)
-cModel = SigmoidRegression(2000, 41, 0.6, 27)
-scModel = SigmoidRegression(4000, 55, 0.8, 27)
-dModel = SigmoidRegression(1000, 0, 0.4, 27)
+epochs = 100000
 
 
 def trainModel(model, X, y):
@@ -54,6 +50,8 @@ def trainModel(model, X, y):
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=learningRate)
 
+    last_loss = 0
+    early_terminate_counter = 0
     for epoch in range(epochs):
         # Converting inputs and labels to Variable
         inputs = torch.from_numpy(X).to(device)
@@ -66,9 +64,9 @@ def trainModel(model, X, y):
 
         # get loss for the predicted output
         loss = criterion(outputs, labels) \
-            + 1e07 * (model.k - model.k) ** 2 \
-            + 1e01 * (model.b - model.ob) ** 2 \
-            + 3e04 * (model.x0 - model.ox0) ** 2
+               + 1e07 * (model.k - model.k) ** 2 \
+               + 1e01 * (model.b - model.ob) ** 2 \
+               + 3e04 * (model.x0 - model.ox0) ** 2
         # print(loss)
         # get gradients w.r.t to parameters
         loss.backward()
@@ -82,6 +80,22 @@ def trainModel(model, X, y):
         if epoch % 1000 == 0:
             print('epoch {}, loss {}'.format(epoch, loss.item()))
 
+        if (last_loss - loss) ** 2 < 1e-7:
+            early_terminate_counter += 1
+        else:
+            early_terminate_counter = 0
+
+        if early_terminate_counter >= 100:
+            print('[early terminate] epoch {}, loss {}'.format(epoch, loss.item()))
+            break
+
+        last_loss = loss
+
+
+sModel = SigmoidRegression(Ys[0][-1] * 2, 27, 1, today_days)
+cModel = SigmoidRegression(Ys[1][-1] * 2, 41, 1, today_days)
+scModel = SigmoidRegression((Ys[0] / 2 + Ys[1])[-1] * 2, 55, 1, today_days)
+dModel = SigmoidRegression(Ys[2][-1] * 2, 0, 1, today_days)
 
 trainModel(sModel, X, np.array(Ys[0], dtype=np.float32))
 trainModel(cModel, X, np.array(Ys[1], dtype=np.float32))
@@ -99,19 +113,29 @@ with torch.no_grad():  # we don't need gradients in the testing
         scP.append(scModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy())
         dP.append(dModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy())
 
-
 plt.clf()
+fig = plt.figure()
+plt.rcParams['figure.figsize'] = [8, 6]
+
+plt.xlabel('Days after 2019-12-31', fontsize=16)
+plt.ylabel('Cases', fontsize=16)
+
 plt.plot(X, Ys[0], 'bo', label='Suspect', alpha=0.5)
 plt.plot(np.arange(60), spredicted, '--', label='Suspect Predictions', alpha=0.5)
 
-plt.plot(X, Ys[1], 'go', label='Confirm', alpha=0.5)
+plt.plot(X, Ys[1], 'yo', label='Confirm', alpha=0.5)
 plt.plot(np.arange(60), cpredicted, '-', label='Confirm Predictions', alpha=0.5)
 
-plt.plot(X, Ys[0] / 2 + Ys[1], 'ro', label='Suspect/2 + Confirm', alpha=0.5)
+plt.plot(X, Ys[0] / 2 + Ys[1], 'go', label='Suspect/2 + Confirm', alpha=0.5)
 plt.plot(np.arange(60), scP, '-', label='Suspect/2 + Confirm Predictions', alpha=0.5)
 
-plt.plot(X, Ys[2], 'yo', label='Death', alpha=0.5)
+plt.plot(X, Ys[2], 'ro', label='Death', alpha=0.5)
 plt.plot(np.arange(60), dP, '-', label='Death Predictions', alpha=0.5)
 
+plt.xlim(-2.25, 59)
+plt.gca().set_xticks(np.arange(60, step=5))
+
+plt.grid()
 plt.legend(loc='best')
+plt.savefig('prediction.png')
 plt.show()
