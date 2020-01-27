@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import torch
 from datetime import datetime
+from datetime import timedelta
 import matplotlib.pyplot as plt
 
 info_frame = pd.read_csv('data/2019-nCoV.csv')
@@ -106,36 +107,58 @@ spredicted = []
 cpredicted = []
 scP = []
 dP = []
+
 with torch.no_grad():  # we don't need gradients in the testing
-    for i in np.arange(60):
-        spredicted.append(sModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy())
-        cpredicted.append(cModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy())
-        scP.append(scModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy())
-        dP.append(dModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy())
+    for i in np.arange(today_days + 30):
+        spredicted.append(sModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy().item())
+        cpredicted.append(cModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy().item())
+        scP.append(scModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy().item())
+        dP.append(dModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy().item())
 
 plt.clf()
-fig = plt.figure()
-plt.rcParams['figure.figsize'] = [8, 6]
+plt.rcParams['figure.figsize'] = [8, 14]
 
-plt.xlabel('Days after 2019-12-31', fontsize=16)
-plt.ylabel('Cases', fontsize=16)
+gs = plt.GridSpec(nrows=3, ncols=1)
+axs = [None, None]
+axs[0] = plt.subplot(gs[0, :])
+axs[1] = plt.subplot(gs[1:, :])
 
-plt.plot(X, Ys[0], 'bo', label='Suspect', alpha=0.5)
-plt.plot(np.arange(60), spredicted, '--', label='Suspect Predictions', alpha=0.5)
+axs[0].title.set_text('Prediction as of {}'.format(str(datetime.now().date())))
 
-plt.plot(X, Ys[1], 'yo', label='Confirm', alpha=0.5)
-plt.plot(np.arange(60), cpredicted, '-', label='Confirm Predictions', alpha=0.5)
+collabel = ("Date", "Suspect", "Confirm", "Predicted Actual", "Death")
+axs[1].axis('tight')
+axs[1].axis('off')
+the_table = axs[1].table(
+    cellText=np.array([[str((init_date + timedelta(days=i)).date()) for i in range(today_days + 30)],
+                       np.round(spredicted).astype(int),
+                       np.round(cpredicted).astype(int),
+                       np.round(scP).astype(int),
+                       np.round(dP).astype(int)], dtype=str).transpose()
+    [today_days + 1: today_days + 30],
+    colLabels=collabel,
+    cellLoc='center',
+    loc='center')
 
-plt.plot(X, Ys[0] / 2 + Ys[1], 'go', label='Suspect/2 + Confirm', alpha=0.5)
-plt.plot(np.arange(60), scP, '-', label='Suspect/2 + Confirm Predictions', alpha=0.5)
+axs[0].set_xlabel('Days after 2019-12-31')
+axs[0].set_ylabel('Cases')
 
-plt.plot(X, Ys[2], 'ro', label='Death', alpha=0.5)
-plt.plot(np.arange(60), dP, '-', label='Death Predictions', alpha=0.5)
+axs[0].plot(X, Ys[0], 'bo', label='Suspect', alpha=0.5)
+axs[0].plot(np.arange(today_days + 30), spredicted, '--', label='Suspect Predictions', alpha=0.5)
 
-plt.xlim(-2.25, 59)
-plt.gca().set_xticks(np.arange(60, step=5))
+axs[0].plot(X, Ys[1], 'yo', label='Confirm', alpha=0.5)
+axs[0].plot(np.arange(today_days + 30), cpredicted, '-', label='Confirm Predictions', alpha=0.5)
 
-plt.grid()
-plt.legend(loc='best')
+axs[0].plot(X, Ys[0] / 2 + Ys[1], 'go', label='Suspect/2 + Confirm', alpha=0.5)
+axs[0].plot(np.arange(today_days + 30), scP, '-', label='Suspect/2 + Confirm Predictions', alpha=0.5)
+
+axs[0].plot(X, Ys[2], 'ro', label='Death', alpha=0.5)
+axs[0].plot(np.arange(today_days + 30), dP, '-', label='Death Predictions', alpha=0.5)
+
+axs[0].set_xlim(-2.25, today_days + 29)
+axs[0].set_xticks(np.arange(today_days + 30, step=5))
+
+axs[0].grid()
+axs[0].legend(loc='best')
+
 plt.savefig('prediction.png')
 plt.show()
