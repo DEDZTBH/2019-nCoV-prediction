@@ -118,10 +118,10 @@ with torch.no_grad():  # we don't need gradients in the testing
 plt.clf()
 plt.rcParams['figure.figsize'] = [8, 14]
 
-gs = plt.GridSpec(nrows=3, ncols=1)
+gs = plt.GridSpec(nrows=12, ncols=1)
 axs = [None, None]
-axs[0] = plt.subplot(gs[0, :])
-axs[1] = plt.subplot(gs[1:, :])
+axs[0] = plt.subplot(gs[:5, :])
+axs[1] = plt.subplot(gs[5:, :])
 
 axs[0].title.set_text('Prediction as of {}'.format(str(datetime.now().date())))
 
@@ -160,5 +160,5 @@ axs[0].set_xticks(np.arange(today_days + 30, step=5))
 axs[0].grid()
 axs[0].legend(loc='best')
 
-plt.savefig('prediction.png')
+plt.savefig('prediction.png', dpi=300)
 plt.show()
