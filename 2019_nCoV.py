@@ -9,9 +9,9 @@ info_frame = pd.read_csv('data/2019-nCoV.csv')
 info_frame.fillna(method='ffill', inplace=True)
 info_frame.fillna(method='bfill', inplace=True)
 init_date = datetime.strptime(info_frame['Date CST'][0], '%Y.%m.%d')
-today_days = (datetime.now() - init_date).days
+today_date = datetime.strptime(info_frame['Date CST'].iloc[-1], '%Y.%m.%d')
+today_days = (today_date - init_date).days
 info_frame['Date CST'] = info_frame['Date CST'].apply(lambda x: (datetime.strptime(x, '%Y.%m.%d') - init_date).days)
-
 X = info_frame['Date CST'].to_numpy()
 X = np.array(X, dtype=np.float32)
 X = X.reshape(-1, 1)
@@ -93,10 +93,10 @@ def trainModel(model, X, y):
         last_loss = loss
 
 
-sModel = SigmoidRegression(Ys[0][-1] * 2, 27, 1, today_days)
-cModel = SigmoidRegression(Ys[1][-1] * 2, 41, 1, today_days)
-scModel = SigmoidRegression((Ys[0] / 2 + Ys[1])[-1] * 2, 55, 1, today_days)
-dModel = SigmoidRegression(Ys[2][-1] * 2, 0, 1, today_days)
+sModel = SigmoidRegression(Ys[0][-1] * 2, 27, 1, today_days + 1)
+cModel = SigmoidRegression(Ys[1][-1] * 2, 41, 1, today_days + 1)
+scModel = SigmoidRegression((Ys[0] / 2 + Ys[1])[-1] * 2, 55, 1, today_days + 1)
+dModel = SigmoidRegression(Ys[2][-1] * 2, 0, 1, today_days + 1)
 
 trainModel(sModel, X, np.array(Ys[0], dtype=np.float32))
 trainModel(cModel, X, np.array(Ys[1], dtype=np.float32))
@@ -123,7 +123,7 @@ axs = [None, None]
 axs[0] = plt.subplot(gs[:5, :])
 axs[1] = plt.subplot(gs[5:, :])
 
-axs[0].title.set_text('Prediction as of {}'.format(str(datetime.now().date())))
+axs[0].title.set_text('Prediction as of {}'.format(str(today_date)))
 
 collabel = ("Date", "Suspect", "Confirm", "Predicted Actual", "Death")
 axs[1].axis('tight')
@@ -134,7 +134,7 @@ the_table = axs[1].table(
                        np.round(cpredicted).astype(int),
                        np.round(scP).astype(int),
                        np.round(dP).astype(int)], dtype=str).transpose()
-    [today_days + 1: today_days + 30],
+    [today_days + 1: today_days + 31],
     colLabels=collabel,
     cellLoc='center',
     loc='center')
@@ -148,8 +148,8 @@ axs[0].plot(np.arange(today_days + 30), spredicted, '--', label='Suspect Predict
 axs[0].plot(X, Ys[1], 'yo', label='Confirm', alpha=0.5)
 axs[0].plot(np.arange(today_days + 30), cpredicted, '-', label='Confirm Predictions', alpha=0.5)
 
-axs[0].plot(X, Ys[0] / 2 + Ys[1], 'go', label='Suspect/2 + Confirm', alpha=0.5)
-axs[0].plot(np.arange(today_days + 30), scP, '-', label='Suspect/2 + Confirm Predictions', alpha=0.5)
+axs[0].plot(X, Ys[0] / 2 + Ys[1], 'go', label='Suspect/2+Confirm', alpha=0.5)
+axs[0].plot(np.arange(today_days + 30), scP, '-', label='Actual Predictions', alpha=0.5)
 
 axs[0].plot(X, Ys[2], 'ro', label='Death', alpha=0.5)
 axs[0].plot(np.arange(today_days + 30), dP, '-', label='Death Predictions', alpha=0.5)
