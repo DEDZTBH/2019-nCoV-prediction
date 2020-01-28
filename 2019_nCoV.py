@@ -64,10 +64,7 @@ def trainModel(model, X, y):
         outputs = model(inputs)
 
         # get loss for the predicted output
-        loss = criterion(outputs, labels) \
-               + 1e07 * (model.k - model.k) ** 2 \
-               + 1e01 * (model.b - model.ob) ** 2 \
-               + 3e04 * (model.x0 - model.ox0) ** 2
+        loss = criterion(outputs, labels)
         # print(loss)
         # get gradients w.r.t to parameters
         loss.backward()
@@ -123,7 +120,7 @@ axs = [None, None]
 axs[0] = plt.subplot(gs[:5, :])
 axs[1] = plt.subplot(gs[5:, :])
 
-axs[0].title.set_text('Prediction as of {}'.format(str(today_date)))
+axs[0].title.set_text('Prediction as of {}'.format(str(today_date + timedelta(hours=23, minutes=59, seconds=59))))
 
 collabel = ("Date", "Suspect", "Confirm", "Predicted Actual", "Death")
 axs[1].axis('tight')
