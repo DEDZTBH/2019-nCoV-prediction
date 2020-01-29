@@ -41,14 +41,14 @@ class SigmoidRegression(torch.nn.Module):
         return (torch.sigmoid((x - ones * self.x0) * self.k) * self.a + ones * self.b).squeeze()
 
 
-learningRate = 0.03
-epochs = 100000
+learningRate = 0.003
+epochs = 1000000
 
 
 def trainModel(model, X, y):
     model.to(device)
 
-    criterion = torch.nn.MSELoss()
+    # criterion = torch.nn.MSELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=learningRate)
 
     last_loss = 0
@@ -64,7 +64,8 @@ def trainModel(model, X, y):
         outputs = model(inputs)
 
         # get loss for the predicted output
-        loss = criterion(outputs, labels)
+        # loss = criterion(outputs, labels)
+        loss = torch.mean((inputs ** 0.5) * ((outputs - labels) ** 2))
         # print(loss)
         # get gradients w.r.t to parameters
         loss.backward()
@@ -78,7 +79,7 @@ def trainModel(model, X, y):
         if epoch % 1000 == 0:
             print('epoch {}, loss {}'.format(epoch, loss.item()))
 
-        if (last_loss - loss) ** 2 < 1e-6:
+        if (last_loss - loss) ** 2 < 1e-3:
             early_terminate_counter += 1
         else:
             early_terminate_counter = 0
@@ -111,6 +112,7 @@ with torch.no_grad():  # we don't need gradients in the testing
         cpredicted.append(cModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy().item())
         scP.append(scModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy().item())
         dP.append(dModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy().item())
+
 
 plt.clf()
 plt.rcParams['figure.figsize'] = [8, 14]
