@@ -68,7 +68,7 @@ def trainModel(model, X, y):
         # print(loss)
         # get gradients w.r.t to parameters
         loss.backward()
-        model.k.grad /= 1e07
+        model.k.grad /= 3e06
         model.b.grad /= 1e01
         model.x0.grad /= 3e04
 
@@ -78,7 +78,7 @@ def trainModel(model, X, y):
         if epoch % 1000 == 0:
             print('epoch {}, loss {}'.format(epoch, loss.item()))
 
-        if (last_loss - loss) ** 2 < 1e-7:
+        if (last_loss - loss) ** 2 < 1e-6:
             early_terminate_counter += 1
         else:
             early_terminate_counter = 0
@@ -123,7 +123,7 @@ axs[1] = plt.subplot(gs[5:, :])
 axs[0].title.set_text('Prediction as of {}'.format(str(today_date + timedelta(hours=23, minutes=59, seconds=59))))
 
 collabel = ("Date", "Suspect", "Confirm", "Predicted Actual", "Death")
-axs[1].axis('tight')
+#axs[1].axis('tight')
 axs[1].axis('off')
 the_table = axs[1].table(
     cellText=np.array([[str((init_date + timedelta(days=i)).date()) for i in range(today_days + 30)],
