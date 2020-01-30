@@ -91,10 +91,10 @@ def trainModel(model, X, y):
         last_loss = loss
 
 
-sModel = SigmoidRegression(Ys[0][-1] * 2, 27, 1, today_days + 1)
-cModel = SigmoidRegression(Ys[1][-1] * 2, 41, 1, today_days + 1)
-scModel = SigmoidRegression((Ys[0] / 2 + Ys[1])[-1] * 2, 55, 1, today_days + 1)
-dModel = SigmoidRegression(Ys[2][-1] * 2, 0, 1, today_days + 1)
+sModel = SigmoidRegression(Ys[0][-1], 27, 1, today_days + 1)
+cModel = SigmoidRegression(Ys[1][-1], 41, 1, today_days + 1)
+scModel = SigmoidRegression((Ys[0] / 2 + Ys[1])[-1], 55, 1, today_days + 1)
+dModel = SigmoidRegression(Ys[2][-1], 0, 0.2, today_days + 1)
 
 trainModel(sModel, X, np.array(Ys[0], dtype=np.float32))
 trainModel(cModel, X, np.array(Ys[1], dtype=np.float32))
@@ -125,7 +125,7 @@ axs[1] = plt.subplot(gs[5:, :])
 axs[0].title.set_text('Prediction as of {}'.format(str(today_date + timedelta(hours=23, minutes=59, seconds=59))))
 
 collabel = ("Date", "Suspect", "Confirm", "Predicted Actual", "Death")
-#axs[1].axis('tight')
+axs[1].axis('tight')
 axs[1].axis('off')
 the_table = axs[1].table(
     cellText=np.array([[str((init_date + timedelta(days=i)).date()) for i in range(today_days + 30)],
