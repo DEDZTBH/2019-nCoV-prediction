@@ -94,7 +94,7 @@ def trainModel(model, X, y):
 sModel = SigmoidRegression(Ys[0][-1], 27, 1, today_days + 1)
 cModel = SigmoidRegression(Ys[1][-1], 41, 1, today_days + 1)
 scModel = SigmoidRegression((Ys[0] / 2 + Ys[1])[-1], 55, 1, today_days + 1)
-dModel = SigmoidRegression(Ys[2][-1], 0, 0.2, today_days + 1)
+dModel = SigmoidRegression(Ys[2][-1], 0, 0.4, today_days + 1)
 
 trainModel(sModel, X, np.array(Ys[0], dtype=np.float32))
 trainModel(cModel, X, np.array(Ys[1], dtype=np.float32))
@@ -114,50 +114,55 @@ with torch.no_grad():  # we don't need gradients in the testing
         dP.append(dModel(torch.from_numpy(np.array([i])).to(device)).cpu().data.numpy().item())
 
 
-plt.clf()
-plt.rcParams['figure.figsize'] = [8, 14]
+def graph():
+    plt.clf()
+    plt.rcParams['figure.figsize'] = [8, 14]
 
-gs = plt.GridSpec(nrows=12, ncols=1)
-axs = [None, None]
-axs[0] = plt.subplot(gs[:5, :])
-axs[1] = plt.subplot(gs[5:, :])
+    gs = plt.GridSpec(nrows=12, ncols=1)
+    axs = [None, None]
+    axs[0] = plt.subplot(gs[:5, :])
+    axs[1] = plt.subplot(gs[5:, :])
 
-axs[0].title.set_text('Prediction as of {}'.format(str(today_date + timedelta(hours=23, minutes=59, seconds=59))))
+    axs[0].title.set_text('Prediction as of {}'.format(str(today_date + timedelta(hours=23, minutes=59, seconds=59))))
 
-collabel = ("Date", "Suspect", "Confirm", "Predicted Actual", "Death")
-axs[1].axis('tight')
-axs[1].axis('off')
-the_table = axs[1].table(
-    cellText=np.array([[str((init_date + timedelta(days=i)).date()) for i in range(today_days + 30)],
-                       np.round(spredicted).astype(int),
-                       np.round(cpredicted).astype(int),
-                       np.round(scP).astype(int),
-                       np.round(dP).astype(int)], dtype=str).transpose()
-    [today_days + 1: today_days + 31],
-    colLabels=collabel,
-    cellLoc='center',
-    loc='center')
+    collabel = ("Date", "Suspect", "Confirm", "Predicted Actual", "Death")
+    axs[1].axis('tight')
+    axs[1].axis('off')
+    the_table = axs[1].table(
+        cellText=np.array([[str((init_date + timedelta(days=i)).date()) for i in range(today_days + 30)],
+                           np.round(spredicted).astype(int),
+                           np.round(cpredicted).astype(int),
+                           np.round(scP).astype(int),
+                           np.round(dP).astype(int)], dtype=str).transpose()
+        [today_days + 1: today_days + 31],
+        colLabels=collabel,
+        cellLoc='center',
+        loc='center')
 
-axs[0].set_xlabel('Days after 2019-12-31')
-axs[0].set_ylabel('Cases')
+    axs[0].set_xlabel('Days after 2019-12-31')
+    axs[0].set_ylabel('Cases')
 
-axs[0].plot(X, Ys[0], 'bo', label='Suspect', alpha=0.5)
-axs[0].plot(np.arange(today_days + 30), spredicted, '--', label='Suspect Predictions', alpha=0.5)
+    axs[0].plot(X, Ys[0], 'bo', label='Suspect', alpha=0.5)
+    axs[0].plot(np.arange(today_days + 30), spredicted, '--', label='Suspect Predictions', alpha=0.5)
 
-axs[0].plot(X, Ys[1], 'yo', label='Confirm', alpha=0.5)
-axs[0].plot(np.arange(today_days + 30), cpredicted, '-', label='Confirm Predictions', alpha=0.5)
+    axs[0].plot(X, Ys[1], 'yo', label='Confirm', alpha=0.5)
+    axs[0].plot(np.arange(today_days + 30), cpredicted, '-', label='Confirm Predictions', alpha=0.5)
 
-axs[0].plot(X, Ys[0] / 2 + Ys[1], 'go', label='Suspect/2+Confirm', alpha=0.5)
-axs[0].plot(np.arange(today_days + 30), scP, '-', label='Actual Predictions', alpha=0.5)
+    axs[0].plot(X, Ys[0] / 2 + Ys[1], 'go', label='Suspect/2+Confirm', alpha=0.5)
+    axs[0].plot(np.arange(today_days + 30), scP, '-', label='Actual Predictions', alpha=0.5)
 
-axs[0].plot(X, Ys[2], 'ro', label='Death', alpha=0.5)
-axs[0].plot(np.arange(today_days + 30), dP, '-', label='Death Predictions', alpha=0.5)
+    axs[0].plot(X, Ys[2], 'ro', label='Death', alpha=0.5)
+    axs[0].plot(np.arange(today_days + 30), dP, '-', label='Death Predictions', alpha=0.5)
 
-axs[0].set_xlim(-2.25, today_days + 29)
-axs[0].set_xticks(np.arange(today_days + 30, step=5))
+    axs[0].set_xlim(-2.25, today_days + 29)
+    axs[0].set_xticks(np.arange(today_days + 30, step=5))
 
-axs[0].grid()
-axs[0].legend(loc='best')
+    axs[0].grid()
+    axs[0].legend(loc='best')
 
-plt.savefig('prediction.png', dpi=300)
-plt.show()
+    plt.savefig('prediction.png', dpi=300)
+    plt.show()
+
+
+graph()
+graph()
