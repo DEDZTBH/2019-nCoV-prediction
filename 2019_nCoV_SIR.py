@@ -3,7 +3,7 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 info_frame = pd.read_csv('data/2019-nCoV.csv')
 info_frame.fillna(method='ffill', inplace=True)
@@ -20,13 +20,13 @@ Y_frame = info_frame.drop(['Date CST'], axis=1)
 Ys = Y_frame.to_numpy().transpose()
 
 # Total population, N.
-N = 1400000000
+N = 30000000
 # Initial number of infected and recovered individuals, I0 and R0.
 I0, R0 = 1, 0
 # Everyone else, S0, is susceptible to infection initially.
 S0 = N - I0 - R0
 # Contact rate, beta, and mean recovery rate, gamma, (in 1/days).
-beta, gamma = 0.6, 1e-3
+beta, gamma = 0.6, 4e-3
 # A grid of time points (in days)
 t = np.linspace(0, 160, 160)
 
@@ -46,26 +46,34 @@ y0 = S0, I0, R0
 ret = odeint(deriv, y0, t, args=(N, beta, gamma))
 S, I, R = ret.T
 
-plt.clf()
-plt.rcParams['figure.figsize'] = [8, 6]
 
-axs = [None, None]
-axs[0] = plt.subplot()
+def graph():
+    plt.clf()
+    plt.rcParams['figure.figsize'] = [8, 6]
 
-axs[0].set_xlabel('Days after 2019-12-31')
-axs[0].set_ylabel('Cases')
+    axs = [None, None]
+    axs[0] = plt.subplot()
 
-# axs[0].plot(X, Ys[0], 'yo', label='Suspect', alpha=0.5)
-# axs[0].plot(X, Ys[1], 'ro', label='Confirm', alpha=0.5)
-axs[0].plot(X, Ys[0] / 2 + Ys[1], 'bo', label='Suspect/2+Confirm', alpha=0.5)
-axs[0].plot(X, Ys[3], 'go', label='Recovered', alpha=0.5)
-# axs[0].set_xlim(-2.25, today_days + 29)
-# axs[0].set_xticks(np.arange(today_days + 30, step=5))
-axs[0].grid()
-axs[0].legend(loc='best')
+    axs[0].title.set_text(
+        'Prediction as of {} CST (SIR model)'.format(str(today_date + timedelta(hours=23, minutes=59, seconds=59))))
+    axs[0].set_xlabel('Days after 2019-12-31')
+    axs[0].set_ylabel('Cases')
 
-# axs[0].plot(t, S/1000, 'b', alpha=0.5, lw=2, label='Susceptible')
-axs[0].plot(t, I/1000, 'r', alpha=0.5, lw=2, label='Infected')
-axs[0].plot(t, R/1000, 'g', alpha=0.5, lw=2, label='Recovered with immunity')
+    axs[0].plot(X, Ys[0] / 2 + Ys[1], 'bo', label='Suspect/2+Confirm', alpha=0.5)
+    axs[0].plot(X, Ys[3], 'go', label='Recovered', alpha=0.5)
+    axs[0].set_xlim(-2.25, today_days + 29)
+    axs[0].set_xticks(np.arange(today_days + 30, step=5))
 
-plt.show()
+    # axs[0].plot(t, S/1000, 'b', alpha=0.5, lw=2, label='Susceptible')
+    axs[0].plot(t, I / 1000, 'r', alpha=0.5, lw=2, label='Infected')
+    axs[0].plot(t, R / 1000, 'g', alpha=0.5, lw=2, label='Recovered with immunity')
+
+    axs[0].grid()
+    axs[0].legend(loc='best')
+
+    plt.savefig('predictionSIR.png', dpi=300)
+
+    plt.show()
+
+
+graph()

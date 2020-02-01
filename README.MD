@@ -5,3 +5,6 @@ Data from: https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_c
 
 Most recent prediction:
 ![prediction.png](https://raw.githubusercontent.com/DEDZTBH/2019-nCoV-prediction/master/prediction.png)
+
+SIR model:
+![predictionSIR.png](https://raw.githubusercontent.com/DEDZTBH/2019-nCoV-prediction/master/predictionSIR.png)

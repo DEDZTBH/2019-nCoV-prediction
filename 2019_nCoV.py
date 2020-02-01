@@ -123,7 +123,7 @@ def graph():
     axs[0] = plt.subplot(gs[:5, :])
     axs[1] = plt.subplot(gs[5:, :])
 
-    axs[0].title.set_text('Prediction as of {}'.format(str(today_date + timedelta(hours=23, minutes=59, seconds=59))))
+    axs[0].title.set_text('Prediction as of {} CST'.format(str(today_date + timedelta(hours=23, minutes=59, seconds=59))))
 
     collabel = ("Date", "Suspect", "Confirm", "Predicted Actual", "Death")
     axs[1].axis('tight')
