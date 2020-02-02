@@ -8,10 +8,10 @@ from datetime import datetime, timedelta
 info_frame = pd.read_csv('data/2019-nCoV.csv')
 info_frame.fillna(method='ffill', inplace=True)
 info_frame.fillna(method='bfill', inplace=True)
-init_date = datetime.strptime(info_frame['Date CST'][0], '%Y.%m.%d')
-today_date = datetime.strptime(info_frame['Date CST'].iloc[-1], '%Y.%m.%d')
+init_date = datetime.strptime(info_frame['Date CST'][0], '%Y-%m-%d')
+today_date = datetime.strptime(info_frame['Date CST'].iloc[-1], '%Y-%m-%d')
 today_days = (today_date - init_date).days
-info_frame['Date CST'] = info_frame['Date CST'].apply(lambda x: (datetime.strptime(x, '%Y.%m.%d') - init_date).days)
+info_frame['Date CST'] = info_frame['Date CST'].apply(lambda x: (datetime.strptime(x, '%Y-%m-%d') - init_date).days)
 X = info_frame['Date CST'].to_numpy()
 X = np.array(X, dtype=np.float32)
 X = X.reshape(-1, 1)
@@ -26,7 +26,7 @@ I0, R0 = 1, 0
 # Everyone else, S0, is susceptible to infection initially.
 S0 = N - I0 - R0
 # Contact rate, beta, and mean recovery rate, gamma, (in 1/days).
-beta, gamma = 0.6, 4e-3
+beta, gamma = 0.59, 3.5e-3
 # A grid of time points (in days)
 t = np.linspace(0, 160, 160)
 
