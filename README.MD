@@ -1,7 +1,7 @@
 # 2019-nCoV Prediction
 "We must remember that these are people, not numbers." -- WHO
 
-Using sigmoid function and SIR model. Assuming 50% of the suspects cases are actually infected.
+Using sigmoid function and SIR model. Actual (50) assumes 50% of the suspects cases are actually infected and Actual (100) assumes 100%.
 
 Data from: https://en.wikipedia.org/wiki/Timeline_of_the_2019%E2%80%9320_Wuhan_coronavirus_outbreak
 
