@@ -20,7 +20,7 @@ Y_frame = info_frame.drop(['Date CST'], axis=1)
 Ys = Y_frame.to_numpy().transpose()
 
 # Total population, N.
-N = 40000000
+N = 45000000
 # Initial number of infected and recovered individuals, I0 and R0.
 I0, R0 = 55, 0
 # Everyone else, S0, is susceptible to infection initially.
