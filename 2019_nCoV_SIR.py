@@ -26,7 +26,7 @@ I0, R0 = 55, 0
 # Everyone else, S0, is susceptible to infection initially.
 S0 = N - I0 - R0
 # Contact rate, beta, and mean recovery rate, gamma, (in 1/days).
-beta, gamma = 0.44, 3.5e-3
+beta, gamma = 0.44, 5e-3
 # A grid of time points (in days)
 t = np.linspace(0, 365, 365)
 
