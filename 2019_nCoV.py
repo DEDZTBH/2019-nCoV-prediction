@@ -66,7 +66,7 @@ def trainModel(model, X, y):
 
         # get loss for the predicted output
         # loss = criterion(outputs, labels)
-        loss = torch.mean(inputs * ((outputs - labels) ** 2))
+        loss = torch.mean((inputs + 1) * ((outputs - labels) ** 2))
         # print(loss)
         # get gradients w.r.t to parameters
         loss.backward()
