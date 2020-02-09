@@ -20,13 +20,13 @@ Y_frame = info_frame.drop(['Date CST'], axis=1)
 Ys = Y_frame.to_numpy().transpose()
 
 # Total population, N.
-N = 55000000
+N = 90000000
 # Initial number of infected and recovered individuals, I0 and R0.
 I0, R0 = 55, 0
 # Everyone else, S0, is susceptible to infection initially.
 S0 = N - I0 - R0
 # Contact rate, beta, and mean recovery rate, gamma, (in 1/days).
-beta, gamma = 0.43, 5e-3
+beta, gamma = 0.43, 6e-3
 # A grid of time points (in days)
 t = np.linspace(0, 365, 365)
 
@@ -59,13 +59,13 @@ def graph():
     axs[0].set_xlabel('Days after 2019-12-31')
     axs[0].set_ylabel('Cases')
 
-    axs[0].plot(X, Ys[0] / 2 + Ys[1], 'bo', label='Actual (50)', alpha=0.5)
+    axs[0].plot(X, Ys[0] + Ys[1], 'bo', label='Actual (100)', alpha=0.5)
     axs[0].plot(X, Ys[3], 'go', label='Recovered', alpha=0.5)
     axs[0].set_xlim(-2.25, today_days + 29)
     axs[0].set_xticks(np.arange(today_days + 30, step=5))
 
     axs[0].plot(t, I / 1000, 'r', alpha=0.5, lw=2, label='Infected')
-    axs[0].plot(t, R / 1000, 'g', alpha=0.5, lw=2, label='Recovered (50)')
+    axs[0].plot(t, R / 1000, 'g', alpha=0.5, lw=2, label='Recovered (100)')
 
     axs[0].grid()
     axs[0].legend(loc='best')
